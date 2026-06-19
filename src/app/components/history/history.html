@@ -1,0 +1,93 @@
+<main class="max-w-7xl py-8 justify-center mx-auto">
+    <div class="space-y-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-users w-6 h-6 text-purple-600">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg></div>
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900">Customer Search</h2>
+                    <p class="text-sm text-gray-500">Find customer stringing history</p>
+                </div>
+            </div>
+            <div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-search absolute left-3 top-3 w-5 h-5 text-gray-400">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg><input #searchInput autocomplete="off" type="text" (input)="onSearch($event)"
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Search by customer name...">
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">All Transactions</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Racket Model
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">String Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tension</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service Price
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service Revenue
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr *ngFor="let customer of paginatedData$ | async" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ customer[1] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ customer[2] }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ customer[4] }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ customer[3] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ customer[5] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ customer[6] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <span [ngClass]="getPaymentClass(customer[7])"
+                                    class="inline-flex px-4 py-1 text-xs font-medium rounded-full">
+                                    {{ customer[7] }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ customer[9] }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                <button type="button" (click)="repeatJob(customer)"
+                                    class="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
+                                    Restring
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div class="text-sm text-gray-600">
+                    Page {{ (currentPage$ | async) || 1 }} of {{ (totalPages$ | async) || 1 }} ({{ (filteredData$ | async)?.length || 0 }} items)
+                </div>
+                <div class="flex gap-2">
+                    <button (click)="previousPage()" [disabled]="(currentPage$ | async) === 1"
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <button (click)="nextPage()" [disabled]="(currentPage$ | async) === (totalPages$ | async)"
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

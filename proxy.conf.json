@@ -1,0 +1,11 @@
+{
+  "/api-google": {
+    "target": "https://script.google.com",
+    "secure": true,
+    "changeOrigin": true,
+    "followRedirects": true,
+    "pathRewrite": {
+      "^/api-google": ""
+    }
+  }
+}

@@ -1,0 +1,61 @@
+<div class="relative bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><svg
+                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="lucide lucide-plus w-6 h-6 text-blue-600">
+                <path d="M5 12h14"></path>
+                <path d="M12 5v14"></path>
+            </svg></div>
+        <h2 class="text-xl font-semibold text-gray-900">Add Stringing Job</h2>
+    </div>
+    <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label><input type="text" [(ngModel)]="form.name"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="John Tan"></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" [(ngModel)]="form.date"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></div>
+        </div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Racket Model</label><input type="text" [(ngModel)]="form.racketModel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Yonex Arcsaber 11"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">String Type</label><select [(ngModel)]="form.stringType"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option *ngFor="let string of (stringList$ | async)" [value]="string">
+                        {{ string }}
+                    </option>
+                </select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Tension</label><input type="text"
+                    [(ngModel)]="form.tension" (blur)="normalizeTension()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="28 lbs"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Service Price</label>
+                <div class="relative"><span class="absolute left-3 top-2 text-gray-500">$</span><input type="number"
+                        [(ngModel)]="form.servicePrice" class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="25"></div>
+            </div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Discount</label>
+                <div class="relative"><span class="absolute left-3 top-2 text-gray-500">$</span><input type="number"
+                        [(ngModel)]="form.discount" class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"></div>
+            </div>
+        </div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label><select [(ngModel)]="form.paymentMethod"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option *ngFor="let paymentType of (paymentTypes$ | async)" [value]="paymentType">
+                    {{ paymentType }}
+            </select></div>
+        <div class="flex gap-3 pt-4">
+            <button type="button" (click)="saveJob()" [disabled]="saving"
+                class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-60 disabled:cursor-not-allowed">
+                <span *ngIf="saving" class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+                <span>{{ saving ? 'Saving...' : 'Save Job' }}</span>
+            </button>
+            <button type="button" (click)="resetForm()"
+                class="px-6 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium">Clear</button>
+        </div>
+    </div>
+</div>

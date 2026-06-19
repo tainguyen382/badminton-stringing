@@ -1,0 +1,18 @@
+<section>
+    <div class="flex justify-between">
+        <div>
+            <p class="font-bold text-xl">Badminton Stringing Manager</p>
+            <p>Business management system</p>
+        </div>
+        <div>
+            <p class="">{{ date | date }}</p>
+        </div>
+    </div>
+    <div class="border-t border-gray-300 my-4 -mx-40"></div>
+    <div class="flex items-center gap-6">
+        <p *ngFor="let item of menu" class="cursor-pointer hover:text-blue-600" (click)="navigate(item)" [class.text-blue-600]="item.active">
+            {{ item.name }}
+        </p>
+    </div>
+    <div class="border-t border-gray-300 my-4 -mx-40"></div>
+</section>
