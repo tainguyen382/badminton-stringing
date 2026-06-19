@@ -82,7 +82,8 @@ export class SheetService {
       let dashboardInfo: dashboardData = {
         monthlyData: this.calculateMonthlyData(values),
         totalRevenue: values[1][12],
-        totalexpense: values[1][11],
+        actualRevenue: values[1][11],
+        totalexpense: values[1][10],
         netProfit: values[1][13],
         totalJobs: this.calcualteTotalJobs(values),
       }

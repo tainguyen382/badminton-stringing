@@ -4,6 +4,7 @@ export interface dashboardData {
         serviceRevenue: any
     };
     totalRevenue: any;
+    actualRevenue: any;
     totalexpense: any;
     netProfit: any;
     totalJobs: any;

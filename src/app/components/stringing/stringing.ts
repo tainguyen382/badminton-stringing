@@ -16,7 +16,7 @@ export class Stringing {
   saving = false;
   form: any = {
     name: '',
-    date: new Date().toISOString().slice(0, 10),
+    date: this.getLocalDateString(),
     racketModel: '',
     stringType: '',
     tension: '',
@@ -112,7 +112,23 @@ export class Stringing {
   }
 
   resetForm() {
-    this.form = { name: '', date: new Date().toISOString().slice(0,10), racketModel: '', stringType: '', tension: '', servicePrice: '', discount: '', paymentMethod: '' };
+    this.form = {
+      name: '',
+      date: this.getLocalDateString(),
+      racketModel: '',
+      stringType: '',
+      tension: '',
+      servicePrice: '',
+      discount: '',
+      paymentMethod: ''
+    };
   }
 
+  private getLocalDateString(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 }
