@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { DatePipe, CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -7,7 +8,6 @@ import { DatePipe, CommonModule } from '@angular/common';
   templateUrl: './header.html',
 })
 export class Header {
-
   menu: any = [
     {
       name: 'Dashboard',
@@ -32,11 +32,13 @@ export class Header {
   ]
   date = new Date();
 
+  constructor(private router: Router) {}
+
   navigate(item: any) {
     this.menu.forEach((menuItem: any) => {
       menuItem.active = menuItem === item;
     });
-    window.location.href = item.link;
+    this.router.navigateByUrl(item.link);
   }
 
 }
