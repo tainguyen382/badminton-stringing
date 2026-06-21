@@ -52,7 +52,7 @@
             <button type="button" (click)="saveJob()" [disabled]="saving"
                 class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-60 disabled:cursor-not-allowed">
                 <span *ngIf="saving" class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-                <span>{{ saving ? 'Saving...' : 'Save Job' }}</span>
+                <span>{{ saving ? (isEditing ? 'Updating...' : 'Saving...') : (isEditing ? 'Update Job' : 'Save Job') }}</span>
             </button>
             <button type="button" (click)="resetForm()"
                 class="px-6 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium">Clear</button>

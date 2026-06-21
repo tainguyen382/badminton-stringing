@@ -14,6 +14,8 @@ export class Stringing {
   stringList$ = new BehaviorSubject<any>([]);
   paymentTypes$ = new BehaviorSubject<any>([]);
   saving = false;
+  isEditing = false;
+  editRowIndex: number | undefined;
   form: any = {
     name: '',
     date: this.getLocalDateString(),
@@ -37,13 +39,18 @@ export class Stringing {
 
     this.route.queryParams.subscribe((params) => {
       if (Object.keys(params).length > 0) {
+        console.log('Stringing form received params:', params);
         this.form.name = params['name'] || this.form.name;
         this.form.racketModel = params['racketModel'] || this.form.racketModel;
         this.form.tension = params['tension'] || this.form.tension;
         this.form.stringType = params['stringType'] || this.form.stringType;
         this.form.paymentMethod = params['paymentMethod'] || this.form.paymentMethod;
         this.form.servicePrice = params['servicePrice'] || this.form.servicePrice;
-        this.form.date = params['date'] || this.form.date;
+        const incomingDate = params['date'] || this.form.date;
+        this.form.date = this.convertDateFormat(incomingDate);
+        this.isEditing = params['edit'] === 'true' || params['edit'] === true;
+        this.editRowIndex = params['rowId'] ? Number(params['rowId']) : undefined;
+        console.log('After param processing:', { isEditing: this.isEditing, editRowIndex: this.editRowIndex });
       }
     });
   }
@@ -68,22 +75,40 @@ export class Stringing {
     ];
 
     console.log('Saving job row', row);
+    console.log('Edit mode check:', { isEditing: this.isEditing, editRowIndex: this.editRowIndex });
 
     try {
       this.saving = true;
-      this.sheetService.appendRow(row).subscribe({
-        next: () => {
-          console.log('Job saved successfully');
-          this.sheetService.consolidateData();
-          this.resetForm();
-          this.saving = false;
-        },
-        error: (err) => {
-          console.error('Failed to save job', err);
-          alert('Save failed: ' + (err?.message || 'Unknown error'));
-          this.saving = false;
-        }
-      });
+      if (this.isEditing && this.editRowIndex) {
+        console.log('Calling updateRow with id:', this.editRowIndex);
+        this.sheetService.updateRow(this.editRowIndex, row).subscribe({
+          next: () => {
+            console.log('Job updated successfully');
+            this.sheetService.consolidateData();
+            this.resetForm();
+            this.saving = false;
+          },
+          error: (err) => {
+            console.error('Failed to update job', err);
+            alert('Update failed: ' + (err?.message || 'Unknown error'));
+            this.saving = false;
+          }
+        });
+      } else {
+        this.sheetService.appendRow(row).subscribe({
+          next: () => {
+            console.log('Job saved successfully');
+            this.sheetService.consolidateData();
+            this.resetForm();
+            this.saving = false;
+          },
+          error: (err) => {
+            console.error('Failed to save job', err);
+            alert('Save failed: ' + (err?.message || 'Unknown error'));
+            this.saving = false;
+          }
+        });
+      }
     } catch (error) {
       this.saving = false;
       console.error('Save job threw an error', error);
@@ -122,6 +147,8 @@ export class Stringing {
       discount: '',
       paymentMethod: ''
     };
+    this.isEditing = false;
+    this.editRowIndex = undefined;
   }
 
   private getLocalDateString(): string {
@@ -129,6 +156,20 @@ export class Stringing {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private convertDateFormat(dateStr: string): string {
+    // Convert from M/D/YYYY or MM/DD/YYYY to yyyy-MM-dd
+    if (!dateStr) return this.getLocalDateString();
+    
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return dateStr; // Already in correct format or invalid
+    
+    const month = String(parts[0]).padStart(2, '0');
+    const day = String(parts[1]).padStart(2, '0');
+    const year = parts[2];
+    
     return `${year}-${month}-${day}`;
   }
 }

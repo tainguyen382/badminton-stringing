@@ -85,6 +85,24 @@ export class History implements AfterViewInit {
     });
   }
 
+  editJob(row: any[]) {
+    const sheetRowId = row && row.length > 14 ? row[14] : undefined;
+    const [type, name, racketModel, tension, stringType, servicePrice, , paymentMethod, , date] = row;
+    this.router.navigate(['/stringing'], {
+      queryParams: {
+        name: name || '',
+        racketModel: racketModel || '',
+        tension: tension || '',
+        stringType: stringType || '',
+        paymentMethod: paymentMethod || '',
+        servicePrice: servicePrice ? servicePrice.toString().replace(/\$/g, '') : '',
+        date: date || this.getLocalDateString(),
+        edit: 'true',
+        rowId: sheetRowId
+      }
+    });
+  }
+
   private getLocalDateString(): string {
     const now = new Date();
     const year = now.getFullYear();
