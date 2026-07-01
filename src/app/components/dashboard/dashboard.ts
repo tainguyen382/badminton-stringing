@@ -14,6 +14,16 @@ export class Dashboard implements OnInit {
 
   constructor(@Inject(SheetService) private sheetService: SheetService) {}
 
+  formatCurrency(value: number | string | null | undefined): string {
+    const numericValue = Number(value ?? 0);
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  }
+
   ngOnInit() {
     this.sheetService.dashboardDataSubject.subscribe((data) => {
       this.dashboardData$.next(data);

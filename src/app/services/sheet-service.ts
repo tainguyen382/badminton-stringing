@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from } from 'rxjs';
+import { BehaviorSubject, forkJoin, from } from 'rxjs';
 import { dashboardData, historyData } from '../interface/data-interface';
 
 @Injectable({
@@ -140,33 +140,45 @@ export class SheetService {
   }
 
   consolidateData() {
-    this.getData().subscribe((res: any) => {
-      const values = res.values;
-      let dashboardInfo: dashboardData = {
+    const revenueRequest = this.getData();
+    const stringRequest = this.getStringList();
+    const paymentRequest = this.getPaymentTypes();
+    const expenseRequest = this.getExpenseData();
+
+    forkJoin<{
+      revenue: any;
+      strings: any;
+      payments: any;
+      expenses: any;
+    }>({
+      revenue: revenueRequest,
+      strings: stringRequest,
+      payments: paymentRequest,
+      expenses: expenseRequest,
+    }).subscribe(({ revenue, strings, payments, expenses }) => {
+      const values = (revenue as any)?.values || [];
+      const stringValues = (strings as any)?.values || [];
+      const paymentValues = (payments as any)?.values || [];
+      const expenseValues = (expenses as any)?.values || [];
+
+      const totalRevenue = Number(this.cleanCurrency(values[1]?.[10] ?? '0')) || 0;
+      const actualRevenue = Number(this.cleanCurrency(values[1]?.[9] ?? '0')) || 0;
+      const expenseTotal = Number(this.cleanCurrency(expenseValues[1]?.[5] ?? '0')) || 0;
+
+      const dashboardInfo: dashboardData = {
         monthlyData: this.calculateMonthlyData(values),
-        totalRevenue: values[1][11],
-        actualRevenue: values[1][10],
-        totalexpense: values[1][9],
-        netProfit: values[1][12],
+        totalRevenue,
+        actualRevenue,
+        totalexpense: expenseTotal,
+        netProfit: totalRevenue - expenseTotal,
         totalJobs: this.calcualteTotalJobs(values),
-      }
+      };
+
       this.dashboardData$.next(dashboardInfo);
       this.historyData$.next(this.getHistoryData(values));
-    });
-    //get string
-    this.getStringList().subscribe((res: any) => {
-      const stringList = this.extractStringList(res);
-      this.stringList$.next(stringList);
-    });
-    //get payment types
-    this.getPaymentTypes().subscribe((res: any) => {
-      const paymentTypes = this.extractPaymentTypes(res);
-      this.paymentTypes$.next(paymentTypes);
-    });
-
-    this.getExpenseData().subscribe((res: any) => {
-      const expenseData = this.getHistoryData(res.values);
-      this.expenseData$.next(expenseData);
+      this.stringList$.next(this.extractStringList({ values: stringValues }));
+      this.paymentTypes$.next(this.extractPaymentTypes({ values: paymentValues }));
+      this.expenseData$.next(this.getHistoryData(expenseValues));
     });
   }
 
