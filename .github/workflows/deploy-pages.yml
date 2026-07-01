@@ -37,7 +37,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/badminton-stringing
+          path: dist/badminton-stringing/browser
 
   deploy:
     needs: build
