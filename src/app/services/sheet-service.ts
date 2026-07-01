@@ -16,6 +16,8 @@ export class SheetService {
 
   private paymentTypesRange = encodeURIComponent("'StaticInfo'!B:Z");
 
+  private expenseDataRange = encodeURIComponent("'All Time Expense'!A:Z");
+
   //dashboard
   private dashboardData$ = new BehaviorSubject<dashboardData | any>([]);
   readonly dashboardDataSubject = this.dashboardData$.asObservable();
@@ -37,7 +39,7 @@ export class SheetService {
 
   // Optional write endpoint for Google Apps Script web app.
   // Deploy your Apps Script as a Web App and paste the URL here.
-  appendWebAppUrl = 'https://script.google.com/macros/s/AKfycbwNlvrhGY0grjnAOmYpMWN4iKwsZJQS_OvxghbCr6sJgXkgyMVkgh0I_BHPO-_tj-A3YQ/exec'
+  appendWebAppUrl = 'https://script.google.com/macros/s/AKfycbyj33X_2qYXuMAT4A3TysKxRaua_vQIGZX-vgVivn0RTEaMXHH-8Upvyw93K3uss0DWsw/exec'
 
   constructor(private http: HttpClient) { }
 
@@ -57,6 +59,12 @@ export class SheetService {
   getPaymentTypes() {
     const url =
       `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${this.paymentTypesRange}?key=${this.apiKey}`;
+    return this.http.get(url);
+  }
+
+  getExpenseData() {
+    const url =
+      `https://sheets.googleapis.com/v4/spreadsheets/${this.sheetId}/values/${this.expenseDataRange}?key=${this.apiKey}`;
     return this.http.get(url);
   }
 
@@ -136,15 +144,14 @@ export class SheetService {
       const values = res.values;
       let dashboardInfo: dashboardData = {
         monthlyData: this.calculateMonthlyData(values),
-        totalRevenue: values[1][12],
-        actualRevenue: values[1][11],
-        totalexpense: values[1][10],
-        netProfit: values[1][13],
+        totalRevenue: values[1][11],
+        actualRevenue: values[1][10],
+        totalexpense: values[1][9],
+        netProfit: values[1][12],
         totalJobs: this.calcualteTotalJobs(values),
       }
       this.dashboardData$.next(dashboardInfo);
       this.historyData$.next(this.getHistoryData(values));
-      this.expenseData$.next(this.getExpenseData(values));
     });
     //get string
     this.getStringList().subscribe((res: any) => {
@@ -156,16 +163,11 @@ export class SheetService {
       const paymentTypes = this.extractPaymentTypes(res);
       this.paymentTypes$.next(paymentTypes);
     });
-  }
 
-  getExpenseData(data: any) {
-    if (!Array.isArray(data)) {
-      return [];
-    }
-    return data
-      .slice(2)
-      .filter((row: any) => (row?.[0] ?? '').toString().trim() === 'Expense' && (row?.[1] ?? '').toString().trim() !== '')
-      .reverse();
+    this.getExpenseData().subscribe((res: any) => {
+      const expenseData = this.getHistoryData(res.values);
+      this.expenseData$.next(expenseData);
+    });
   }
 
   getHistoryData(data: any) {
@@ -176,7 +178,7 @@ export class SheetService {
     const out: any[] = [];
     for (let i = 2; i < data.length; i++) {
       const row = data[i];
-      if ((row?.[0] ?? '').toString().trim() === 'Income' && (row?.[1] ?? '').toString().trim() !== '') {
+      if ((row?.[1] ?? '').toString().trim() !== '') {
         out.push(Array.isArray(row) ? [...row] : [row]);
       }
     }
@@ -185,9 +187,8 @@ export class SheetService {
 
   calcualteTotalJobs(data: any) {
     let totalJobs = 0;
-    for (let i = 2; i < data.length; i++) {
-      const type = data[i][0];
-      if (type === 'Income' && (data[i][1] ?? '').toString().trim() !== '') {
+    for (let i = 1; i < data.length; i++) {
+      if ((data[i][1] ?? '').toString().trim() !== '') {
         totalJobs++;
       }
     }
@@ -197,22 +198,18 @@ export class SheetService {
   calculateMonthlyData(data: any) {
     const totals = { totalRevenue: 0, serviceRevenue: 0 };
     for (let i = 2; i < data.length; i++) {
-
-      const type = data[i][0];
-      const rawDate = data[i][9];
-
-      if (type !== 'Income' || !rawDate) continue;
+      const rawDate = data[i][8];
+      if (!rawDate) continue;
 
       const date = new Date(rawDate);
-
       if (
         date.getMonth() === this.currentMonth &&
         date.getFullYear() === this.currentYear
       ) {
-        const totalRaw = (data[i][5] ?? '').toString().replace(/\$/g, '').trim();
-        const serviceRaw = (data[i][6] ?? '').toString().replace(/\$/g, '').trim();
-        const totalVal = parseFloat(totalRaw) || 0;
-        const serviceVal = parseFloat(serviceRaw) || 0;
+        const totalRaw = (data[i][5] ?? '').toString();
+        const serviceRaw = (data[i][6] ?? '').toString();
+        const totalVal = parseFloat(this.cleanCurrency(totalRaw)) || 0;
+        const serviceVal = parseFloat(this.cleanCurrency(serviceRaw)) || 0;
         totals.totalRevenue += totalVal;
         totals.serviceRevenue += serviceVal;
       }
@@ -220,11 +217,15 @@ export class SheetService {
     return totals;
   }
 
+  private cleanCurrency(value: string): string {
+    return value.toString().replace(/[$,]/g, '').trim();
+  }
+
   extractStringList(response: any): string[] {
     return response.values.slice(2).map((row: any[]) => row[0]);
   }
 
   extractPaymentTypes(response: any): string[] {
-    return response.values.slice(2).map((row: any[]) => row[0]);
+    return response.values.slice(1).map((row: any[]) => row[0]);
   }
 }

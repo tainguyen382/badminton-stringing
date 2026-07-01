@@ -3,7 +3,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-600">Total Revenue</p>
+                    <p class="text-sm text-gray-600">Monthly Revenue</p>
                     <p class="text-2xl font-semibold text-gray-900 mt-1">{{ "$" + ((dashboardData$ | async)?.monthlyData?.serviceRevenue || 0) }}</p>
                     <p class="text-sm text-gray-400">{{ "$" + ((dashboardData$ | async)?.monthlyData?.totalRevenue || 0) }}</p>
                 </div>

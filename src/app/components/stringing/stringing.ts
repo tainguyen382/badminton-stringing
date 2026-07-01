@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SheetService } from '../../services/sheet-service';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +28,8 @@ export class Stringing {
   };
   constructor(
     @Inject(SheetService) private sheetService: SheetService,
-    @Inject(ActivatedRoute) private route: ActivatedRoute
+    @Inject(ActivatedRoute) private route: ActivatedRoute,
+    @Inject(Router) private router: Router
   ) {
     this.sheetService.stringListSubject.subscribe((data) => {
       this.stringList$.next(data);
@@ -60,33 +61,63 @@ export class Stringing {
     const total = parseFloat(this.form.servicePrice) || 0;
     const discount = parseFloat(this.form.discount) || 0;
     const revenue = Math.max(0, total - discount);
+    this.saving = true;
 
-    const row = [
-      'Income',
-      this.form.name,
-      this.form.racketModel,
-      this.form.tension,
-      this.form.stringType,
-      `$${total}`,
-      `$${revenue}`,
-      this.form.paymentMethod,
-      '',
-      this.form.date
-    ];
+    if (this.isEditing && this.editRowIndex !== undefined && Number.isFinite(this.editRowIndex)) {
+      // For edit, use existing ID
+      const row = [
+        this.editRowIndex,
+        this.form.name,
+        this.form.racketModel,
+        this.form.tension,
+        this.form.stringType,
+        `$${total}`,
+        `$${revenue}`,
+        this.form.paymentMethod,
+        this.form.date
+      ];
+      this.performSave(row, true, this.editRowIndex);
+    } else {
+      // For new row, fetch the next ID from sheet
+      this.sheetService.getData().subscribe({
+        next: (res: any) => {
+          const nextId = this.getNextIdFromData(res.values);
+          const row = [
+            nextId,
+            this.form.name,
+            this.form.racketModel,
+            this.form.tension,
+            this.form.stringType,
+            `$${total}`,
+            `$${revenue}`,
+            this.form.paymentMethod,
+            this.form.date
+          ];
+          this.performSave(row, false);
+        },
+        error: (err) => {
+          console.error('Failed to fetch sheet data for ID generation', err);
+          alert('Failed to generate ID: ' + (err?.message || 'Unknown error'));
+          this.saving = false;
+        }
+      });
+    }
+  }
 
+  private performSave(row: any[], isUpdate: boolean, editId?: number) {
     console.log('Saving job row', row);
     console.log('Edit mode check:', { isEditing: this.isEditing, editRowIndex: this.editRowIndex });
 
     try {
-      this.saving = true;
-      if (this.isEditing && this.editRowIndex) {
-        console.log('Calling updateRow with id:', this.editRowIndex);
-        this.sheetService.updateRow(this.editRowIndex, row).subscribe({
+      if (isUpdate && editId !== undefined) {
+        console.log('Calling updateRow with id:', editId);
+        this.sheetService.updateRow(editId, row).subscribe({
           next: () => {
             console.log('Job updated successfully');
             this.sheetService.consolidateData();
             this.resetForm();
             this.saving = false;
+            this.router.navigate(['/history']);
           },
           error: (err) => {
             console.error('Failed to update job', err);
@@ -101,6 +132,7 @@ export class Stringing {
             this.sheetService.consolidateData();
             this.resetForm();
             this.saving = false;
+            this.router.navigate(['/history']);
           },
           error: (err) => {
             console.error('Failed to save job', err);
@@ -115,6 +147,21 @@ export class Stringing {
       alert('Save failed: ' + (error as Error).message);
     }
   }
+
+  private getNextIdFromData(data: any[]): number {
+    let maxId = 0;
+    for (let i = 2; i < data.length; i++) {
+      const row = data[i];
+      if (row && row.length > 0) {
+        const id = parseInt(row[0], 10);
+        if (!isNaN(id) && id > maxId) {
+          maxId = id;
+        }
+      }
+    }
+    return maxId + 1;
+  }
+
 
   normalizeTension() {
     const raw = (this.form.tension ?? '').toString().trim();

@@ -71,7 +71,7 @@ export class History implements AfterViewInit {
   }
 
   repeatJob(row: any[]) {
-    const [type, name, racketModel, tension, stringType, servicePrice, , paymentMethod, , date] = row;
+    const [id, name, racketModel, tension, stringType, servicePrice, revenue, paymentMethod, date] = row;
     this.router.navigate(['/stringing'], {
       queryParams: {
         name: name || '',
@@ -86,8 +86,9 @@ export class History implements AfterViewInit {
   }
 
   editJob(row: any[]) {
-    const sheetRowId = row && row.length > 14 ? row[14] : undefined;
-    const [type, name, racketModel, tension, stringType, servicePrice, , paymentMethod, , date] = row;
+    const parsedRowId = row && row.length > 0 ? Number(row[0]) : NaN;
+    const sheetRowId = Number.isFinite(parsedRowId) ? parsedRowId : undefined;
+    const [id, name, racketModel, tension, stringType, servicePrice, revenue, paymentMethod, date] = row;
     this.router.navigate(['/stringing'], {
       queryParams: {
         name: name || '',
@@ -96,7 +97,7 @@ export class History implements AfterViewInit {
         stringType: stringType || '',
         paymentMethod: paymentMethod || '',
         servicePrice: servicePrice ? servicePrice.toString().replace(/\$/g, '') : '',
-        date: date || this.getLocalDateString(),
+        date: this.convertDateFormat(date || this.getLocalDateString()),
         edit: 'true',
         rowId: sheetRowId
       }
@@ -108,6 +109,16 @@ export class History implements AfterViewInit {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private convertDateFormat(dateStr: string): string {
+    if (!dateStr) return this.getLocalDateString();
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return dateStr;
+    const month = String(parts[0]).padStart(2, '0');
+    const day = String(parts[1]).padStart(2, '0');
+    const year = parts[2];
     return `${year}-${month}-${day}`;
   }
 
