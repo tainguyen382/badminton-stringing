@@ -28,11 +28,16 @@ export class Header {
       name: 'Expenses',
       link: '/expenses',
       active: false
-    }
+    },
+    {
+      name: 'Business History',
+      link: '/bussiness-history',
+      active: false
+    },
   ]
   date = new Date();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   navigate(item: any) {
     this.menu.forEach((menuItem: any) => {

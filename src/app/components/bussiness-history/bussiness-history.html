@@ -1,0 +1,47 @@
+<section class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold text-gray-900">Business History</h2>
+      <p class="text-sm text-gray-500">Past income by month</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div
+      *ngFor="let month of monthlyIncome$ | async"
+      class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-600">{{ month.label }}</p>
+          <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(month.discountedIncome) }}</p>
+          <p class="text-sm text-gray-400">{{ formatCurrency(month.actualIncome) }}</p>
+        </div>
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-dollar-sign w-6 h-6 text-green-600"
+          >
+            <line x1="12" x2="12" y1="2" y2="22"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="!(monthlyIncome$ | async)?.length"
+    class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-500"
+  >
+    No monthly income data yet.
+  </div>
+</section>
