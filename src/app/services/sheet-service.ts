@@ -234,7 +234,7 @@ export class SheetService {
   }
 
   extractStringList(response: any): string[] {
-    return response.values.slice(2).map((row: any[]) => row[0]);
+    return response.values.slice(1).map((row: any[]) => row[0]);
   }
 
   extractPaymentTypes(response: any): string[] {
