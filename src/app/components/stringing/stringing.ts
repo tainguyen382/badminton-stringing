@@ -47,6 +47,7 @@ export class Stringing {
         this.form.stringType = params['stringType'] || this.form.stringType;
         this.form.paymentMethod = params['paymentMethod'] || this.form.paymentMethod;
         this.form.servicePrice = params['servicePrice'] || this.form.servicePrice;
+        this.form.discount = params['discount'] ?? this.form.discount;
         const incomingDate = params['date'] || this.form.date;
         this.form.date = this.convertDateFormat(incomingDate);
         this.isEditing = params['edit'] === 'true' || params['edit'] === true;

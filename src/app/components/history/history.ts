@@ -97,11 +97,31 @@ export class History implements AfterViewInit {
         stringType: stringType || '',
         paymentMethod: paymentMethod || '',
         servicePrice: servicePrice ? servicePrice.toString().replace(/\$/g, '') : '',
+        discount: this.getDiscountValue(servicePrice, revenue),
         date: this.convertDateFormat(date || this.getLocalDateString()),
         edit: 'true',
         rowId: sheetRowId
       }
     });
+  }
+
+  private getDiscountValue(servicePrice: any, revenue: any): string {
+    const parseAmount = (value: any): number | null => {
+      if (value === null || value === undefined || value === '') return null;
+      const normalized = value.toString().replace(/[$,\s]/g, '');
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const price = parseAmount(servicePrice);
+    const earned = parseAmount(revenue);
+
+    if (price === null || earned === null) {
+      return '';
+    }
+
+    const discount = Math.max(0, price - earned);
+    return Number.isFinite(discount) ? discount.toString() : '';
   }
 
   private getLocalDateString(): string {
