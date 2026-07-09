@@ -78,7 +78,7 @@ export class History implements AfterViewInit {
         racketModel: racketModel || '',
         tension: tension || '',
         stringType: stringType || '',
-        paymentMethod: paymentMethod || '',
+        paymentMethod: 'Unpaid',
         servicePrice: servicePrice ? servicePrice.toString().replace(/\$/g, '') : '',
         date: this.getLocalDateString()
       }

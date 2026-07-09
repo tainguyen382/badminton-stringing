@@ -24,13 +24,13 @@ export class Header {
       link: '/history',
       active: false
     },
+    // {
+    //   name: 'Expenses',
+    //   link: '/expenses',
+    //   active: false
+    // },
     {
-      name: 'Expenses',
-      link: '/expenses',
-      active: false
-    },
-    {
-      name: 'Business History',
+      name: 'Monthly',
       link: '/bussiness-history',
       active: false
     },
