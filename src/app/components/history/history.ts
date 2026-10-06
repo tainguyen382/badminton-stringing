@@ -1,13 +1,14 @@
 import { Component, Inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
 import { map, startWith, shareReplay } from 'rxjs/operators';
 import { SheetService } from '../../services/sheet-service';
 import { AsyncPipe, CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-history',
-  imports: [AsyncPipe, CommonModule],
+  imports: [AsyncPipe, CommonModule, FormsModule],
   templateUrl: './history.html',
 })
 export class History implements AfterViewInit {
@@ -18,10 +19,15 @@ export class History implements AfterViewInit {
   currentPage$ = new BehaviorSubject<number>(1);
   itemsPerPage = 10;
   searchTerm$ = new BehaviorSubject<string>('');
+  bulkPayment = 'Unpaid';
+  isBulkUpdating = false;
+  selectedRows = new Set<number>();
+  pageLoading = false;
 
   filteredData$: Observable<any[]>;
   paginatedData$: Observable<any[]>;
   totalPages$: Observable<number>;
+  paymentOptions$: Observable<string[]>;
 
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
@@ -31,6 +37,18 @@ export class History implements AfterViewInit {
 
     // assign raw observable from the injected service (must be set before using)
     this.historyData$ = this.sheetService.historyDataSubject;
+    this.paymentOptions$ = this.sheetService.paymentTypesSubject.pipe(
+      map((values) => (Array.isArray(values) ? values : []).map((value) => value?.toString().trim()).filter(Boolean)),
+      shareReplay(1)
+    );
+
+    this.paymentOptions$.subscribe((options) => {
+      if (!options.length) return;
+      const defaultOption = options.find((item) => item.toLowerCase() === 'unpaid') || options[0];
+      if (!this.bulkPayment || !options.includes(this.bulkPayment)) {
+        this.bulkPayment = defaultOption;
+      }
+    });
 
     // filtered data = combine raw data + search term
     this.filteredData$ = combineLatest<[any[], string]>([
@@ -153,6 +171,65 @@ export class History implements AfterViewInit {
   }
 
   
+
+  getRowId(row: any[]): number | null {
+    const parsedRowId = row && row.length > 0 ? Number(row[0]) : NaN;
+    return Number.isFinite(parsedRowId) ? parsedRowId : null;
+  }
+
+  isRowSelected(row: any[]): boolean {
+    const rowId = this.getRowId(row);
+    return rowId !== null && this.selectedRows.has(rowId);
+  }
+
+  toggleRowSelection(row: any[]): void {
+    const rowId = this.getRowId(row);
+    if (rowId === null) return;
+
+    if (this.selectedRows.has(rowId)) {
+      this.selectedRows.delete(rowId);
+    } else {
+      this.selectedRows.add(rowId);
+    }
+  }
+
+  clearSelection(): void {
+    this.selectedRows.clear();
+  }
+
+  applyBulkPayment(): void {
+    if (this.selectedRows.size === 0 || !this.bulkPayment.trim()) {
+      return;
+    }
+
+    this.isBulkUpdating = true;
+    this.pageLoading = true;
+    this.historyData$.subscribe((rows) => {
+      const selectedIds = (rows || [])
+        .map((row) => this.getRowId(row))
+        .filter((rowId): rowId is number => rowId !== null && this.selectedRows.has(rowId));
+
+      if (!selectedIds.length) {
+        this.isBulkUpdating = false;
+        this.pageLoading = false;
+        return;
+      }
+
+      this.sheetService.bulkUpdatePayment(selectedIds, this.bulkPayment.trim()).subscribe({
+        next: () => {
+          this.selectedRows.clear();
+          this.sheetService.consolidateData();
+          this.isBulkUpdating = false;
+          this.pageLoading = false;
+        },
+        error: () => {
+          this.isBulkUpdating = false;
+          this.pageLoading = false;
+          alert('Bulk payment update failed.');
+        }
+      });
+    });
+  }
 
   // pagination controls operate on currentPage$
   nextPage() {

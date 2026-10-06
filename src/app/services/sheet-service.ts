@@ -39,7 +39,7 @@ export class SheetService {
 
   // Optional write endpoint for Google Apps Script web app.
   // Deploy your Apps Script as a Web App and paste the URL here.
-  appendWebAppUrl = 'https://script.google.com/macros/s/AKfycbyj33X_2qYXuMAT4A3TysKxRaua_vQIGZX-vgVivn0RTEaMXHH-8Upvyw93K3uss0DWsw/exec'
+  appendWebAppUrl = 'https://script.google.com/macros/s/AKfycbzO5JI7XiHUka1Dlj1mdUAh-lLpQs6ze-vOCnwn-uC7dU_OXCgqJOgkFKWAkZSHJOvLlg/exec'
 
   constructor(private http: HttpClient) { }
 
@@ -114,6 +114,30 @@ export class SheetService {
       })
       .catch((err) => {
         console.error('updateRow: Fetch error', err);
+        throw err;
+      });
+
+    return from(nativeFetchPromise);
+  }
+
+  bulkUpdatePayment(ids: number[], payment: string) {
+    const directUrl = this.appendWebAppUrl;
+    console.log('bulkUpdatePayment: Sending to', directUrl, { action: 'bulkUpdatePayment', ids, payment });
+
+    const nativeFetchPromise = fetch(directUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: JSON.stringify({ action: 'bulkUpdatePayment', ids, payment })
+    })
+      .then((response) => {
+        console.log('bulkUpdatePayment: Response received', response);
+        return 'Bulk payment update dispatched!';
+      })
+      .catch((err) => {
+        console.error('bulkUpdatePayment: Fetch error', err);
         throw err;
       });
 
