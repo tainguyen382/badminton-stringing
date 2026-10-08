@@ -1,47 +1,71 @@
-<section class="space-y-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <h2 class="text-2xl font-semibold text-gray-900">Business History</h2>
-      <p class="text-sm text-gray-500">Past income by month</p>
-    </div>
-  </div>
+<main class="business-history-page space-y-6 pb-8">
+  <header class="workflow-page-heading">
+    <p class="workflow-kicker">Revenue</p>
+    <h1>Business history</h1>
+    <p class="workflow-page-description">Compare monthly collected income and spot your strongest months.</p>
+  </header>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div
-      *ngFor="let month of monthlyIncome$ | async"
-      class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-    >
-      <div class="flex items-center justify-between">
+  <ng-container *ngIf="monthlyIncome$ | async as months">
+    <section *ngIf="months.length" class="monthly-trend" aria-labelledby="monthly-trend-title">
+      <div class="monthly-trend-heading">
         <div>
-          <p class="text-sm text-gray-600">{{ month.label }}</p>
-          <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(month.discountedIncome) }}</p>
-          <p class="text-sm text-gray-400">{{ formatCurrency(month.actualIncome) }}</p>
+          <p class="monthly-trend-kicker">Monthly pulse</p>
+          <h2 id="monthly-trend-title">Collected income</h2>
         </div>
-        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-dollar-sign w-6 h-6 text-green-600"
-          >
-            <line x1="12" x2="12" y1="2" y2="22"></line>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-          </svg>
+        <div class="monthly-trend-total">
+          <span>Total recorded</span>
+          <strong>{{ formatCurrency(totalCollectedIncome) }}</strong>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div
-    *ngIf="!(monthlyIncome$ | async)?.length"
-    class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-500"
-  >
-    No monthly income data yet.
-  </div>
-</section>
+      <div class="income-chart-scroll" role="img" aria-label="Collected stringing income by month, ordered from oldest to newest">
+        <div class="income-chart-bars">
+          <div *ngFor="let month of (chartMonths$ | async)"
+            class="income-chart-column"
+            [attr.title]="month.label + ': ' + formatCurrency(month.discountedIncome)">
+            <div class="income-chart-track">
+              <span class="income-chart-bar"
+                [class.income-chart-bar-first]="incomeRank(month.monthKey) === 1"
+                [class.income-chart-bar-second]="incomeRank(month.monthKey) === 2"
+                [class.income-chart-bar-third]="incomeRank(month.monthKey) === 3"
+                [style.height.%]="barHeight(month.discountedIncome)"></span>
+            </div>
+            <span class="income-chart-label">{{ month.chartLabel }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="monthly-trend-footer">
+        <span><span class="income-chart-legend-dot"></span>Collected after discounts</span>
+        <span>{{ months.length }} months recorded</span>
+      </div>
+    </section>
+
+    <section *ngIf="months.length" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Monthly income details">
+      <article *ngFor="let month of months"
+        class="business-month-card min-w-0 rounded-lg border border-gray-200 bg-white p-3 shadow-sm sm:p-6"
+        [class.income-rank-first]="incomeRank(month.monthKey) === 1"
+        [class.income-rank-second]="incomeRank(month.monthKey) === 2"
+        [class.income-rank-third]="incomeRank(month.monthKey) === 3">
+        <div class="mb-3 flex flex-wrap items-center gap-1.5">
+          <p class="truncate text-xs text-gray-600 sm:text-sm">{{ month.label }}</p>
+          <span *ngIf="incomeRank(month.monthKey) as rank"
+            class="income-rank-badge"
+            [ngClass]="{'income-rank-badge-first': rank === 1, 'income-rank-badge-second': rank === 2, 'income-rank-badge-third': rank === 3}">
+            #{{ rank }}
+          </span>
+        </div>
+        <p class="month-income-label">Collected</p>
+        <p class="month-income-value">{{ formatCurrency(month.discountedIncome) }}</p>
+        <div class="month-full-price">
+          <span>Full price</span>
+          <span>{{ formatCurrency(month.actualIncome) }}</span>
+        </div>
+      </article>
+    </section>
+
+    <div *ngIf="!months.length" class="insight-empty border border-dashed border-gray-300 bg-white">
+      No monthly income data yet.
+    </div>
+  </ng-container>
+</main>

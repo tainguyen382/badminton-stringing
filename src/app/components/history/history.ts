@@ -19,6 +19,8 @@ export class History implements AfterViewInit {
   currentPage$ = new BehaviorSubject<number>(1);
   itemsPerPage = 10;
   searchTerm$ = new BehaviorSubject<string>('');
+  unpaidOnly = false;
+  private unpaidOnly$ = new BehaviorSubject<boolean>(false);
   bulkPayment = 'Unpaid';
   isBulkUpdating = false;
   selectedRows = new Set<number>();
@@ -50,18 +52,20 @@ export class History implements AfterViewInit {
       }
     });
 
-    // filtered data = combine raw data + search term
-    this.filteredData$ = combineLatest<[any[], string]>([
+    // Apply text search and payment filters together.
+    this.filteredData$ = combineLatest<[any[], string, boolean]>([
       (this.historyData$ as Observable<any[]>).pipe(startWith([] as any[])),
       this.searchTerm$.pipe(startWith('')),
+      this.unpaidOnly$,
     ]).pipe(
       map((vals) => {
         const data = vals[0] as any[];
         const term = vals[1] as string;
+        const unpaidOnly = vals[2] as boolean;
         const t = (term || '').toString().trim().toLowerCase();
-        if (!t) return Array.isArray(data) ? data : [];
         return (Array.isArray(data) ? data : []).filter((row: any[]) =>
-          row.some((cell) => (cell ?? '').toString().toLowerCase().includes(t))
+          (!unpaidOnly || (row?.[7] ?? '').toString().trim().toLowerCase() === 'unpaid') &&
+          (!t || row.some((cell) => (cell ?? '').toString().toLowerCase().includes(t)))
         );
       }),
       shareReplay(1)
@@ -247,6 +251,12 @@ export class History implements AfterViewInit {
     this.currentPage$.next(1);
   }
 
+  toggleUnpaidFilter(): void {
+    this.unpaidOnly = !this.unpaidOnly;
+    this.unpaidOnly$.next(this.unpaidOnly);
+    this.currentPage$.next(1);
+  }
+
   getPaymentClass(payment: string) {
     const normalized = (payment ?? '').toString().trim().toLowerCase();
 
@@ -265,6 +275,18 @@ export class History implements AfterViewInit {
         return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  getPaymentIcon(payment: string): string {
+    switch ((payment ?? '').toString().trim().toLowerCase()) {
+      case 'unpaid': return 'schedule';
+      case 'venmo': return 'account_balance_wallet';
+      case 'cash': return 'payments';
+      case 'zelle': return 'account_balance';
+      case 'apple pay': return 'phone_iphone';
+      case 'free': return 'redeem';
+      default: return 'payments';
     }
   }
 }

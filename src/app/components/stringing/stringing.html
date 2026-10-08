@@ -1,61 +1,96 @@
-<div class="relative bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><svg
-                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="lucide lucide-plus w-6 h-6 text-blue-600">
-                <path d="M5 12h14"></path>
-                <path d="M12 5v14"></path>
-            </svg></div>
-        <h2 class="text-xl font-semibold text-gray-900">Add Stringing Job</h2>
-    </div>
-    <div class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label><input type="text" [(ngModel)]="form.name"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Tai Nguyen"></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Date</label><input type="date" [(ngModel)]="form.date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></div>
-        </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Racket Model</label><input type="text" [(ngModel)]="form.racketModel"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Yonex Nanoflare 1000z"></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">String Type</label><select [(ngModel)]="form.stringType"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option *ngFor="let string of (stringList$ | async)" [value]="string">
-                        {{ string }}
-                    </option>
-                </select></div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Tension</label><input type="text"
-                    [(ngModel)]="form.tension" (blur)="normalizeTension()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="26 lbs"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Service Price</label>
-                <div class="relative"><span class="absolute left-3 top-2 text-gray-500">$</span><input type="number"
-                        [(ngModel)]="form.servicePrice" class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="25"></div>
+<main class="workflow-page pb-8">
+    <header class="workflow-page-heading">
+        <p class="workflow-kicker">Stringing entry</p>
+        <h1>{{ isEditing ? 'Update stringing job' : 'New stringing job' }}</h1>
+        <p>{{ isEditing ? 'Review the details and save your changes.' : 'Enter the customer and racket details for this service.' }}</p>
+    </header>
+
+    <section class="workflow-panel">
+        <section class="workflow-section">
+            <div class="workflow-section-heading">
+                <span>01</span>
+                <h2>Customer and racket</h2>
             </div>
-            <div><label class="block text-sm font-medium text-gray-700 mb-1">Discount</label>
-                <div class="relative"><span class="absolute left-3 top-2 text-gray-500">$</span><input type="number"
-                        [(ngModel)]="form.discount" class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"></div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label class="workflow-field" for="customer-name">
+                    Customer name
+                    <input id="customer-name" type="text" [(ngModel)]="form.name" name="customerName"
+                        class="workflow-control" placeholder="Customer name">
+                </label>
+                <label class="workflow-field" for="job-date">
+                    Service date
+                    <input id="job-date" type="date" [(ngModel)]="form.date" name="serviceDate" class="workflow-control">
+                </label>
+                <label class="workflow-field sm:col-span-2" for="racket-model">
+                    Racket model
+                    <input id="racket-model" type="text" [(ngModel)]="form.racketModel" name="racketModel"
+                        class="workflow-control" placeholder="e.g. Yonex Nanoflare 1000Z">
+                </label>
             </div>
-        </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label><select [(ngModel)]="form.paymentMethod"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option *ngFor="let paymentType of (paymentTypes$ | async)" [value]="paymentType">
-                    {{ paymentType }}
-            </select></div>
-        <div class="flex gap-3 pt-4">
+        </section>
+
+        <section class="workflow-section">
+            <div class="workflow-section-heading">
+                <span>02</span>
+                <h2>String setup</h2>
+            </div>
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <label class="workflow-field" for="string-type">
+                    String type
+                    <select id="string-type" [(ngModel)]="form.stringType" name="stringType" class="workflow-control">
+                        <option value="" disabled>Select string</option>
+                        <option *ngFor="let string of (stringList$ | async)" [value]="string">{{ string }}</option>
+                    </select>
+                </label>
+                <label class="workflow-field" for="tension">
+                    Tension
+                    <input id="tension" type="text" [(ngModel)]="form.tension" name="tension"
+                        (blur)="normalizeTension()" class="workflow-control" placeholder="e.g. 26x28">
+                </label>
+            </div>
+        </section>
+
+        <section class="workflow-section">
+            <div class="workflow-section-heading">
+                <span>03</span>
+                <h2>Pricing and payment</h2>
+            </div>
+            <div class="pricing-grid grid grid-cols-3 gap-2 sm:gap-4">
+                <label class="workflow-field" for="service-price">
+                    <span class="workflow-field-label">Service price</span>
+                    <span class="workflow-input-prefix">
+                        <span aria-hidden="true">$</span>
+                        <input id="service-price" type="number" [(ngModel)]="form.servicePrice" name="servicePrice"
+                            class="workflow-control" placeholder="25">
+                    </span>
+                </label>
+                <label class="workflow-field" for="discount">
+                    <span class="workflow-field-label">Discount</span>
+                    <span class="workflow-input-prefix">
+                        <span aria-hidden="true">$</span>
+                        <input id="discount" type="number" [(ngModel)]="form.discount" name="discount"
+                            class="workflow-control" placeholder="0">
+                    </span>
+                </label>
+                <label class="workflow-field" for="payment-method">
+                    <span class="workflow-field-label">Payment</span>
+                    <select id="payment-method" [(ngModel)]="form.paymentMethod" name="paymentMethod" class="workflow-control">
+                        <option value="" disabled>Select</option>
+                        <option *ngFor="let paymentType of (paymentTypes$ | async)" [value]="paymentType">{{ paymentType }}</option>
+                    </select>
+                </label>
+            </div>
+        </section>
+
+        <div class="workflow-actions">
             <button type="button" (click)="saveJob()" [disabled]="saving"
-                class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-60 disabled:cursor-not-allowed">
+                class="workflow-primary-action inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60">
                 <span *ngIf="saving" class="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
-                <span>{{ saving ? (isEditing ? 'Updating...' : 'Saving...') : (isEditing ? 'Update Job' : 'Save Job') }}</span>
+                <span>{{ saving ? (isEditing ? 'Updating...' : 'Saving...') : (isEditing ? 'Save changes' : 'Save job') }}</span>
             </button>
-            <button type="button" (click)="resetForm()"
-                class="px-6 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium">Clear</button>
+            <button type="button" (click)="resetForm()" [disabled]="saving" class="workflow-secondary-action">
+                Clear form
+            </button>
         </div>
-    </div>
-</div>
+    </section>
+</main>

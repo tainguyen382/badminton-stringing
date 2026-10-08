@@ -6,6 +6,7 @@ import { SheetService } from '../../services/sheet-service';
 interface MonthlyIncomeSummary {
   monthKey: string;
   label: string;
+  chartLabel: string;
   actualIncome: number;
   discountedIncome: number;
 }
@@ -17,6 +18,9 @@ interface MonthlyIncomeSummary {
 })
 export class BussinessHistory implements OnInit {
   monthlyIncome$ = new BehaviorSubject<MonthlyIncomeSummary[]>([]);
+  chartMonths$ = new BehaviorSubject<MonthlyIncomeSummary[]>([]);
+  private incomeRanks = new Map<string, number>();
+  maxMonthlyIncome = 0;
 
   constructor(@Inject(SheetService) private sheetService: SheetService) {}
 
@@ -24,8 +28,30 @@ export class BussinessHistory implements OnInit {
     this.sheetService.consolidateData();
 
     this.sheetService.historyDataSubject.subscribe((rows) => {
-      this.monthlyIncome$.next(this.buildMonthlyIncome(rows || []));
+      const monthlyIncome = this.buildMonthlyIncome(rows || []);
+      this.monthlyIncome$.next(monthlyIncome);
+      this.chartMonths$.next([...monthlyIncome].reverse());
+      this.maxMonthlyIncome = Math.max(0, ...monthlyIncome.map((month) => month.discountedIncome));
+      this.incomeRanks = new Map(
+        [...monthlyIncome]
+          .sort((first, second) => second.discountedIncome - first.discountedIncome)
+          .slice(0, 3)
+          .map((month, index) => [month.monthKey, index + 1])
+      );
     });
+  }
+
+  incomeRank(monthKey: string): number | null {
+    return this.incomeRanks.get(monthKey) ?? null;
+  }
+
+  get totalCollectedIncome(): number {
+    return this.monthlyIncome$.value.reduce((total, month) => total + month.discountedIncome, 0);
+  }
+
+  barHeight(income: number): number {
+    if (this.maxMonthlyIncome <= 0 || income <= 0) return 0;
+    return Math.max(5, Math.round((income / this.maxMonthlyIncome) * 100));
   }
 
   private buildMonthlyIncome(rows: any[]): MonthlyIncomeSummary[] {
@@ -40,10 +66,12 @@ export class BussinessHistory implements OnInit {
 
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       const label = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+      const chartLabel = date.toLocaleString('en-US', { month: 'short' });
 
       const current = grouped.get(monthKey) ?? {
         monthKey,
         label,
+        chartLabel,
         actualIncome: 0,
         discountedIncome: 0,
       };

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { DatePipe, CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -12,16 +13,25 @@ export class Header {
     {
       name: 'Dashboard',
       link: '/',
+      icon: 'dashboard',
       active: true
     },
     {
       name: 'Stringing',
       link: '/stringing',
+      icon: 'build',
       active: false
     },
     {
       name: 'History',
       link: '/history',
+      icon: 'history',
+      active: false
+    },
+    {
+      name: 'Customers',
+      link: '/customer-insights',
+      icon: 'people',
       active: false
     },
     // {
@@ -32,18 +42,28 @@ export class Header {
     {
       name: 'Monthly',
       link: '/bussiness-history',
+      icon: 'date_range',
       active: false
     },
   ]
   date = new Date();
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {
+    this.syncActiveItem();
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => this.syncActiveItem());
+  }
 
   navigate(item: any) {
-    this.menu.forEach((menuItem: any) => {
-      menuItem.active = menuItem === item;
-    });
     this.router.navigateByUrl(item.link);
+  }
+
+  private syncActiveItem(): void {
+    const currentPath = this.router.url.split(/[?#]/)[0];
+    this.menu.forEach((item: any) => {
+      item.active = item.link === currentPath;
+    });
   }
 
 }

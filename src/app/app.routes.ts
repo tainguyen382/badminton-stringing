@@ -4,6 +4,7 @@ import { Stringing } from './components/stringing/stringing';
 import { History } from './components/history/history';
 import { Expense } from './components/expense/expense';
 import { BussinessHistory } from './components/bussiness-history/bussiness-history';
+import { CustomerInsights } from './components/customer-insights/customer-insights';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,10 @@ export const routes: Routes = [
   {
     path: 'history',
     component: History                        
+  },
+  {
+    path: 'customer-insights',
+    component: CustomerInsights
   },
   {
     path: 'expenses',

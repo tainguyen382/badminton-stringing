@@ -1,19 +1,23 @@
-<section>
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="font-bold text-xl">Badminton Stringing Manager</p>
-        <p class="text-sm text-gray-500">Business management system</p>
-        <p class="text-sm text-gray-500">{{ date | date }}</p>
+<header class="app-header mb-6">
+    <div class="flex items-center justify-between gap-3 pb-4 sm:pb-5">
+      <div class="flex min-w-0 items-center gap-3">
+        <img src="assets/badmintonswing.png" alt="" class="h-11 w-11 shrink-0 rounded-md bg-white object-contain sm:h-12 sm:w-12" />
+        <div class="min-w-0">
+          <p class="app-wordmark truncate">Badminton Stringing</p>
+          <p class="text-xs text-gray-500 sm:text-sm">Workshop ledger <span class="px-1 text-gray-300">/</span> {{ date | date }}</p>
+        </div>
       </div>
-      <div>
-        <img src="assets/badmintonswing.png" alt="logo" class="w-14 h-14  object-contain" />
-      </div>
+      <span class="hidden items-center gap-2 text-xs font-semibold uppercase text-gray-500 sm:inline-flex">
+        <span class="h-2 w-2 rounded-full bg-lime-400"></span>
+        Court desk
+      </span>
     </div>
-    <div class="border-t border-gray-300 my-4"></div>
-    <div class="flex flex-wrap gap-3">
-      <p *ngFor="let item of menu" class="cursor-pointer rounded-md border border-transparent px-3 py-2 hover:border-blue-500 hover:text-blue-600" (click)="navigate(item)" [class.text-blue-600]="item.active">
-        {{ item.name }}
-      </p>
-    </div>
-    <div class="border-t border-gray-300 my-4"></div>
-</section>
+    <nav aria-label="Main navigation" class="app-nav grid grid-cols-5 gap-1 sm:flex sm:gap-2">
+      <button *ngFor="let item of menu" type="button" [attr.aria-label]="item.name" [title]="item.name"
+        class="app-nav-item flex min-w-0 items-center justify-center gap-1 rounded-md border border-transparent px-2 py-2 text-gray-600 sm:gap-2 sm:px-3"
+        (click)="navigate(item)" [class.active]="item.active">
+        <span aria-hidden="true" class="material-icons text-xl">{{ item.icon }}</span>
+        <span class="sr-only sm:not-sr-only">{{ item.name }}</span>
+      </button>
+    </nav>
+</header>

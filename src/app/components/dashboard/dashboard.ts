@@ -1,16 +1,17 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SheetService } from '../../services/sheet-service';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { dashboardData } from '../../interface/data-interface';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [AsyncPipe],
+  imports: [AsyncPipe, DatePipe],
   templateUrl: './dashboard.html',
 })
 export class Dashboard implements OnInit {
   dashboardData$: BehaviorSubject<dashboardData | null> = new BehaviorSubject<dashboardData | null>(null);
+  today = new Date();
 
   constructor(@Inject(SheetService) private sheetService: SheetService) {}
 
