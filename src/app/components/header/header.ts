@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { DatePipe, CommonModule } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -9,6 +9,8 @@ import { filter } from 'rxjs';
   templateUrl: './header.html',
 })
 export class Header {
+  @Output() lockRequested = new EventEmitter<void>();
+
   menu: any = [
     {
       name: 'Dashboard',

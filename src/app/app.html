@@ -1,6 +1,31 @@
-<section class="app-shell min-h-screen w-full px-3 py-5 sm:px-6 sm:py-8 lg:px-10">
+<main *ngIf="!isUnlocked" class="pin-lock-screen">
+  <section class="pin-lock-panel" aria-labelledby="pin-heading">
+    <img src="assets/badmintonswing.png" alt="" class="pin-lock-logo">
+    <p class="workflow-kicker">Badminton stringing</p>
+    <h1 id="pin-heading">{{ pinHeading }}</h1>
+    <p class="pin-lock-instructions">{{ pinInstructions }}</p>
+
+    <div class="pin-dots" role="status" aria-label="PIN entry progress" aria-live="polite">
+      <span *ngFor="let slot of pinSlots; let index = index" [class.filled]="index < pinValue.length"></span>
+    </div>
+
+    <p *ngIf="pinError" class="pin-lock-error" role="alert">{{ pinError }}</p>
+
+    <div class="pin-keypad" aria-label="PIN keypad">
+      <button *ngFor="let digit of keypadDigits" type="button" [disabled]="isVerifyingPin"
+        [attr.aria-label]="'Digit ' + digit" (click)="pressDigit(digit)">{{ digit }}</button>
+      <span aria-hidden="true"></span>
+      <button type="button" [disabled]="isVerifyingPin" aria-label="Digit 0" (click)="pressDigit(0)">0</button>
+      <button type="button" [disabled]="isVerifyingPin || !pinValue.length" aria-label="Delete last digit"
+        (click)="deleteDigit()"><span aria-hidden="true" class="material-icons">backspace</span></button>
+    </div>
+    <p class="pin-lock-note">PIN is saved on this device.</p>
+  </section>
+</main>
+
+<section *ngIf="isUnlocked" class="app-shell min-h-screen w-full px-3 py-5 sm:px-6 sm:py-8 lg:px-10">
   <div class="app-frame mx-auto w-full max-w-screen-xl">
-    <app-header></app-header>
+    <app-header (lockRequested)="lockApp()"></app-header>
     <div class="page-stage w-full">
       <router-outlet></router-outlet>
     </div>
