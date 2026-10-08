@@ -7,16 +7,11 @@
           <p class="text-xs text-gray-500 sm:text-sm">Workshop ledger <span class="px-1 text-gray-300">/</span> {{ date | date }}</p>
         </div>
       </div>
-      <div class="flex shrink-0 items-center gap-2 sm:gap-4">
+      <div class="hidden shrink-0 items-center gap-2 sm:flex sm:gap-4">
         <span class="hidden items-center gap-2 text-xs font-semibold uppercase text-gray-500 sm:inline-flex">
           <span class="h-2 w-2 rounded-full bg-lime-400"></span>
           Court desk
         </span>
-        <button type="button" class="app-lock-button" aria-label="Lock application" title="Lock application"
-          (click)="lockRequested.emit()">
-          <span aria-hidden="true" class="material-icons">lock</span>
-          <span class="hidden sm:inline">Lock</span>
-        </button>
       </div>
     </div>
     <nav aria-label="Main navigation" class="app-nav grid grid-cols-5 gap-1 sm:flex sm:gap-2">
