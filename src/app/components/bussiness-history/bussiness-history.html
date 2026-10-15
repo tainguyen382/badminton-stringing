@@ -42,20 +42,22 @@
     </section>
 
     <section *ngIf="months.length" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Monthly income details">
-      <article *ngFor="let month of months"
+      <article *ngFor="let month of months; let isLast = last"
         class="business-month-card min-w-0 rounded-lg border border-gray-200 bg-white p-3 shadow-sm sm:p-6"
+        [class.business-month-card-last-single]="isLast && months.length % 2 === 1"
         [class.income-rank-first]="incomeRank(month.monthKey) === 1"
         [class.income-rank-second]="incomeRank(month.monthKey) === 2"
         [class.income-rank-third]="incomeRank(month.monthKey) === 3">
         <div class="mb-3 flex flex-wrap items-center gap-1.5">
           <p class="truncate text-xs text-gray-600 sm:text-sm">{{ month.label }}</p>
+          <span *ngIf="isCurrentMonth(month.monthKey)" class="month-status-badge">In progress</span>
           <span *ngIf="incomeRank(month.monthKey) as rank"
             class="income-rank-badge"
             [ngClass]="{'income-rank-badge-first': rank === 1, 'income-rank-badge-second': rank === 2, 'income-rank-badge-third': rank === 3}">
             #{{ rank }}
           </span>
         </div>
-        <p class="month-income-label">Collected</p>
+        <p class="month-income-label">{{ isCurrentMonth(month.monthKey) ? 'Collected so far' : 'Collected' }}</p>
         <p class="month-income-value">{{ formatCurrency(month.discountedIncome) }}</p>
         <div class="month-full-price">
           <span>Full price</span>

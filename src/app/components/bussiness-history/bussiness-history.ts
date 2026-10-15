@@ -45,6 +45,12 @@ export class BussinessHistory implements OnInit {
     return this.incomeRanks.get(monthKey) ?? null;
   }
 
+  isCurrentMonth(monthKey: string): boolean {
+    const today = new Date();
+    const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    return monthKey === currentMonthKey;
+  }
+
   get totalCollectedIncome(): number {
     return this.monthlyIncome$.value.reduce((total, month) => total + month.discountedIncome, 0);
   }
