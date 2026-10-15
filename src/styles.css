@@ -239,8 +239,22 @@ select:focus-visible {
 	background: #fff;
 	padding: 0.6rem 0.75rem;
 	color: var(--court-ink);
-	font-size: 0.9rem;
+	font-size: 1rem;
 	font-weight: 400;
+}
+
+.workflow-control[type='date'] {
+	display: block;
+	box-sizing: border-box;
+	max-width: 100%;
+	min-width: 0;
+	padding-right: 0.35rem;
+	font-size: 1rem;
+}
+
+.workflow-control[type='date']::-webkit-date-and-time-value {
+	min-width: 0;
+	text-align: left;
 }
 
 .workflow-control::placeholder {

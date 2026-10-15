@@ -11,7 +11,7 @@
                 <span>01</span>
                 <h2>Customer and racket</h2>
             </div>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
                 <label class="workflow-field" for="customer-name">
                     Customer name
                     <input id="customer-name" type="text" [(ngModel)]="form.name" name="customerName"
@@ -21,7 +21,7 @@
                     Service date
                     <input id="job-date" type="date" [(ngModel)]="form.date" name="serviceDate" class="workflow-control">
                 </label>
-                <label class="workflow-field sm:col-span-2" for="racket-model">
+                <label class="workflow-field col-span-2" for="racket-model">
                     Racket model
                     <input id="racket-model" type="text" [(ngModel)]="form.racketModel" name="racketModel"
                         class="workflow-control" placeholder="e.g. Yonex Nanoflare 1000Z">

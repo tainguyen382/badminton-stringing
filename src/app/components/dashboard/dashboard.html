@@ -12,7 +12,7 @@
             <div class="dashboard-card-top">
                 <span class="dashboard-label">Monthly revenue</span>
                 <span class="dashboard-icon material-icons" aria-hidden="true">payments</span>
-            </div>
+        </div>
             <p class="dashboard-value">{{ formatCurrency((dashboardData$ | async)?.monthlyData?.serviceRevenue) }}</p>
             <div class="dashboard-card-foot"><span>This month</span><span>{{ formatCurrency((dashboardData$ | async)?.monthlyData?.totalRevenue) }} total</span></div>
         </article>
